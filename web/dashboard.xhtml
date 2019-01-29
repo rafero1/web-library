@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <meta charser="utf-8" />
+        <title>Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!--jQuery-->
+        <script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+
+        <!--Bootstrap-->
+        <link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css" />
+        <script type="text/javascript" src="./js/bootstrap.bundle.min.js"></script>
+
+        <!--Stylesheets-->
+        <link rel="stylesheet" type="text/css" href="./css/main.css" />
+
+        <!--Scripts-->
+        <script type="text/javascript" src="./js/main.js"></script>
+
+    </h:head>
+    <h:body>
+
+        <div class="container">
+
+            <!-- Page Header -->
+            <section class="content" id="dshb-header">
+                <header>
+                    <h1 class="display-3">Dashboard</h1>
+                </header>
+
+                <p class="lead"> Adicione categorias, items e notas.</p>
+
+                <!-- Nav menu -->
+                <nav class="nav">
+                    <div>
+                        <button type="button" class="btn btn-outline-dark" id="add-cat-button" data-toggle="modal" data-target="#add-cat-modal">Nova Categoria</button>
+                        <button type="button" class="btn btn-outline-dark" id="add-item-button" data-toggle="modal" data-target="#add-item-modal">Novo Item</button>
+                        <button type="button" class="btn btn-outline-dark" id="add-note-button" data-toggle="modal" data-target="#add-note-modal">Nova Anotação</button>
+                    </div>
+                </nav>
+                <!-- Fim do Nav menu -->
+            </section>
+            <!-- Fim do Page Header -->
+
+            <!-- Mensagem -->
+            <c:if test="${not empty dashboardMB.mensagem}">
+                <aside class="">
+                    <div class="alert alert-info" role="alert">${dashboardMB.mensagem}</div>
+                </aside>
+            </c:if>
+            <!-- Fim da Mensagem -->
+
+            <!-- Biblioteca -->
+            <section class="content" id="dshb-container-cat">
+                <header>
+                    <h6 class="">Biblioteca</h6>
+                </header>
+                <c:if test="${not empty dashboardMB.categorias}">
+
+                    <!-- Card da categoria -->
+                    <ui:repeat var="cat" value="#{dashboardMB.getAllCategorias()}">
+                        <div class="card" id="cat-#{cat.categoriaId}">
+                            <div class="card-body">
+                                <h5 class="card-title">#{cat.nome}</h5>
+                                <p class="card-text">#{cat.descricao}</p>
+                                <br/>
+
+                                <!-- Accordion dos items -->
+                                <div class="accordion" id="cat-content">
+                                    <ui:repeat var="item" value="#{dashboardMB.getItemsFrom(cat)}">
+                                        <!-- Item -->
+                                        <div class="card item-${item.itemId}}">
+                                            <div class="card-header" id="heading-#{item.itemId}">
+                                                <h5 class="mb-0">
+                                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse-#{item.itemId}" aria-expanded="true" aria-controls="collapse-#{item.itemId}">
+                                                        #{item.nome}
+                                                    </button>
+                                                </h5>
+                                            </div>
+                                            <div id="collapse-#{item.itemId}" class="collapse" aria-labelledby="heading-#{item.itemId}" data-parent="#cat-content">
+                                                <div class="card-body">
+                                                    <p>Titulo: #{item.nome}</p>
+                                                    <p>Autor: #{item.autor}</p>
+                                                    <p>Status: #{item.status}</p>
+
+                                                    <hr class="my-1"/>
+
+                                                    <!-- Notes -->
+                                                    <ui:repeat var="note" value="${dashboardMB.getNotesFrom(item)}">
+                                                        <div>
+                                                            <h:form>
+                                                            <p>#{note.content}</p>
+                                                            <h:commandButton class="btn btn-outline-secondary" value="Remover Nota" action="#{dashboardMB.delNote(note)}"></h:commandButton>
+                                                            </h:form>
+                                                        </div>
+                                                    </ui:repeat>
+
+                                                </div>
+                                                <!-- Fim das Notes -->
+
+                                                <h:form class="card-footer form-inline">
+                                                    <div class="">
+                                                        <h:commandButton class="btn btn-outline-secondary" value="Remover item" action="#{dashboardMB.delItem(item)}"></h:commandButton>
+                                                        <button type="button" class="btn btn-outline-dark edit-item-button" data-toggle="modal" data-target="#add-item-modal">Editar Item</button>
+                                                    </div>
+                                                </h:form>
+                                            </div>
+                                        </div>
+                                        <!-- Fim do Item -->
+                                    </ui:repeat>
+                                </div>
+                                <!-- Fim do Accordion dos items -->
+
+                                <h:form class="card-footer form-inline">
+                                    <div class="">
+                                        <h:commandButton class="btn btn-outline-secondary" value="Remover categoria" action="#{dashboardMB.delCategoria(cat)}"></h:commandButton>
+                                    </div>
+                                </h:form>
+                            </div>
+                        </div>
+                    </ui:repeat>
+                    <!-- Fim do Card da categoria -->
+                </c:if>
+            </section>
+            <!-- Fim da Biblioteca -->
+
+            <!-- Modal - Nova categoria -->
+            <div class="modal fade" id="add-cat-modal" tabindex="-1" role="dialog" aria-labelledby="add-item-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="add-item-modal-label">Criar nova Categoria</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <h:form>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="add-cat-nome"> Nome </label>
+                                    <h:inputText class="form-control" id="add-cat-nome" title="Nome" value="#{dashboardMB.categoria.nome}"></h:inputText>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-cat-desc"> Descrição </label>
+                                    <h:inputText class="form-control" id="add-cat-desc" title="Descrição" value="#{dashboardMB.categoria.descricao}"></h:inputText>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                <h:commandButton class="btn btn-outline-primary" value="Confirmar" action="#{dashboardMB.addCategoria()}"></h:commandButton>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal - Novo item -->
+            <div class="modal fade" id="add-item-modal" tabindex="-1" role="dialog" aria-labelledby="add-item-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="add-item-modal-label">Criar novo Item</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <h:form>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="add-item-nome"> Nome </label>
+                                    <h:inputText class="form-control" id="add-item-nome" title="Nome" value="#{dashboardMB.item.nome}"></h:inputText>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-item-autor"> Autor </label>
+                                    <h:inputText class="form-control" id="add-item-autor" title="Autor" value="#{dashboardMB.item.autor}"></h:inputText>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-item-status"> Status </label>
+                                    <h:selectOneListbox class="form-control" id="add-item-status" value="#{dashboardMB.item.status}">
+                                        <f:selectItem itemValue="Em Andamento" itemLabel="Em Andamento"/>
+                                        <f:selectItem itemValue="Terminado" itemLabel="Terminado"/>
+                                    </h:selectOneListbox>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="add-item-cat"> Categoria </label>
+                                    <c:set var="catId" scope="request"></c:set>
+                                    <h:selectOneListbox class="custom-select" id="add-item-cat" value="#{catId}">
+                                        <c:if test="${not empty dashboardMB.categorias}">
+                                            <f:selectItems value="#{dashboardMB.categorias}" var="cat" itemValue="#{cat.categoriaId}" itemLabel="#{cat.nome}"/>
+                                        </c:if>
+                                    </h:selectOneListbox>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                <!-- <h:commandButton class="btn btn-primary" value="Salvar" action="#{dashboardMB.editItem(id)}"></h:commandButton> -->
+                                <h:commandButton class="btn btn-primary" value="Confirmar" action="#{dashboardMB.addItemPara(catId)}"></h:commandButton>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal - Nova note -->
+            <div class="modal fade" id="add-note-modal" tabindex="-1" role="dialog" aria-labelledby="add-note-modal-label" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="add-note-modal-label">Criar nova Note</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <h:form>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="add-note-content"> Conteúdo </label>
+                                    <h:inputText class="form-control" id="add-note-autor" title="Note" value="#{dashboardMB.note.content}"></h:inputText>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="add-note-item"> Item </label>
+                                    <c:set var="itId" scope="request"></c:set>
+                                    <h:selectOneListbox class="form-control" id="add-note-item" value="#{itId}">
+                                        <c:if test="${not empty dashboardMB.items}">
+                                            <f:selectItems value="#{dashboardMB.items}" var="it" itemValue="#{it.itemId}" itemLabel="#{it.nome}"/>
+                                        </c:if>
+                                    </h:selectOneListbox>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                <h:commandButton class="btn btn-primary" value="Confirmar" action="#{dashboardMB.addNotePara(itId)}"></h:commandButton>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </h:body>
+</html>

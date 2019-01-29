@@ -1,0 +1,12 @@
+.card {
+    width: 100%;
+    margin: 1rem 0rem;
+}
+
+.content {
+    margin-bottom: 4rem;
+}
+
+#cat-content .card {
+    margin: 0rem 0rem;
+}
